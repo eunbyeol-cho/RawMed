@@ -1,4 +1,4 @@
-# RawMed: Generating Multi-Table Time Series EHR from Latent Space
+# Generating Multi-Table Time Series EHR from Latent Space
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv-red)](https://arxiv.org/abs/2507.06996)
 [![Code](https://img.shields.io/badge/Code-GitHub-blue)](https://github.com/eunbyeol-cho/RawMed)
@@ -71,10 +71,10 @@ See `MTTSeval/README.md` for detailed setup and usage instructions.
 If you use RawMed in your research, please cite:
 
 ```bibtex
-@article{cho2024rawmed,
+@article{cho2025rawmed,
   title={Generating Multi-Table Time Series EHR from Latent Space with Minimal Preprocessing},
   author={Cho, Eunbyeol and Kim, Jiyoun and Lee, Minjae and Park, Sungjin and Choi, Edward},
   journal={arXiv preprint arXiv:2507.06996},
-  year={2024}
+  year={2025}
 }
 ```
