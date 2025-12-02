@@ -74,7 +74,7 @@ If you use RawMed in your research, please cite:
 @article{cho2024rawmed,
   title={Generating Multi-Table Time Series EHR from Latent Space with Minimal Preprocessing},
   author={Cho, Eunbyeol and Kim, Jiyoun and Lee, Minjae and Park, Sungjin and Choi, Edward},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  journal={arXiv preprint arXiv:2507.06996},
   year={2024}
 }
 ```
