@@ -1,0 +1,37 @@
+# Base configuration for all datasets
+
+def get_base_config():
+    return {
+        # Model/training hyperparameters
+        "obs_size": 12,
+        "seed": 0,
+        "input_index_size": 28996,
+        "embed_dim": 128,
+        "pred_dim": 64,
+        "max_event_token_len": 128,
+        "dropout": 0.1,
+        "n_heads": 4,
+        "n_layers": 2,
+        "embed_list": ["input"],
+        "num_epochs": 50,
+        "batch_size": 64,
+        "lr": 5e-5,
+        "patience": 10,
+        "recovery": True,
+        "recovery_save": True,
+        "use_multiprocessing": True,
+        "num_workers": 32,
+        "process_time": "filter",
+        "reduce_vocab": False,
+        "threshold": 0.5,
+        "postprocess_steps": [1, 2, 3],
+        "real_data_root": "",
+        "syn_data_root": "",
+        "output_data_root": "",
+        "sample": False,
+        "nep_lr": 0.001,
+        "nep_epochs": 50,
+        "nep_patience": 10,
+        "nep_batch_size": 256,
+        "nep_threshold": 0.1,
+    } 

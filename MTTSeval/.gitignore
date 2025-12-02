@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+
+# Distribution / packaging
+.Python
+env/
+venv/
+lib/python*/site-packages/
+dist/
+build/
+develop-eggs/
+.eggs/
+
+# Environments
+.env 
+
+# Jupyter Notebook files
+.ipynb_checkpoints/
+
+# PyTorch related
+*.pt
+*.pth
+checkpoints/
+logs/
+runs/ 
+
+# results
+results*/
+result*/
+analyze.ipynb
+test.ipynb
+catboost_info/
+_deprecated/
+neurips.ipynb
+
+# IDEs and others
+.idea/ # PyCharm
+.vscode/ # VS Code
+*.swp # Vim
+*.swo # Vim
+.DS_Store # macOS
+Thumbs.db # Windows
