@@ -226,7 +226,7 @@ def run_pred_similarity(config):
     output_data_root = config['output_data_root']
 
     set_seed(seed)
-    col_dtype = pd.read_pickle(os.path.join(real_data_root, f"{ehr}_col_dtype.pickle"))
+    col_dtype = pd.read_pickle(os.path.join(real_data_root, f"{ehr}_table_metadata.pkl"))
 
     for table_name in table_names:
         real_data = pd.read_csv(os.path.join(real_data_root, f"{table_name}.csv"))

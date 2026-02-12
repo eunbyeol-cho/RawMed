@@ -65,7 +65,7 @@ class eICU(EHR):
                 "exclude": ["labid", "labresultrevisedoffset"],
                 # "numeric": ["labresult"],
                 "numeric": ["labresult", "labresulttext"],
-                "categorical": ['labname', 'labmeasurenamesystem', 'labmeasurenameinterface', 'labtypeid'],
+                "categorical": ['labtypeid', 'labname', 'labmeasurenamesystem', 'labmeasurenameinterface'],
                 'item': 'labname',
             },
             {
@@ -81,7 +81,7 @@ class eICU(EHR):
                     "drugordercancelled",
                 ],
                 "numeric": [],
-                "categorical": ['drugivadmixture', 'drugname', 'dosage', 'routeadmin', 'frequency', 'prn'],
+                "categorical": ['drugivadmixture', 'drugname', 'dosage', 'routeadmin', 'frequency', 'loadingdose', 'prn'],
                 'item': 'drugname',
             },
             {

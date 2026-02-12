@@ -186,7 +186,7 @@ def main(config, cut=False, cut_samples=None):
     
     real_dfs, syn_dfs = load_tables(config)
         
-    col_type = pd.read_pickle(os.path.join(real_data_root, config["col_type"]))
+    col_type = pd.read_pickle(os.path.join(real_data_root, f"{config['ehr']}_table_metadata.pkl"))
     splits = pd.read_csv(os.path.join(real_data_root, config["split_file_name"])).reset_index()
     train_indices = splits[splits[split_col] == "train"]["index"]
 

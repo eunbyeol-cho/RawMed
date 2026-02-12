@@ -7,8 +7,6 @@ def get_mimiciv_config():
         "ehr": "mimiciv",
         "max_event_size": {6: 165, 12: 243, 24: 366}[config["obs_size"]],
         "table_names": ["labevents", "inputevents", "prescriptions"],
-        "predef_vocab": "mimiciv_predef_vocab.pickle",
-        "col_type": "mimiciv_col_dtype.pickle",
         "split_file_name": "mimiciv_split.csv",
         "input_file_name": "mimiciv_hi_input.npy",
         "type_file_name": "mimiciv_hi_type.npy",

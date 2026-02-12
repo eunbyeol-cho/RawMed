@@ -8,7 +8,6 @@ from evaluation.eval_stat import StatisticalDistributionAnalyzer
 from evaluation.eval_time import TimeAnalyzer
 from evaluation.eval_utility import run_tstr
 from evaluation.eval_predsim import run_pred_similarity
-from evaluation.eval_cond import run_cond
 from evaluation.eval_next_event_predict import run_next_event_predict
 from utils.convert_table_to_text import load_tables
 from utils.configs import get_config
@@ -106,7 +105,7 @@ def eval_stat_corr_time(config):
 
     # Load predefined data
     real_dfs, syn_dfs = load_tables(config)
-    col_type = pd.read_pickle(os.path.join(real_data_root, config["col_type"]))
+    col_type = pd.read_pickle(os.path.join(real_data_root, f"{ehr}_table_metadata.pkl"))
     splits = pd.read_csv(os.path.join(real_data_root, config["split_file_name"])).reset_index()
     train_indices = splits[splits[split_col] == "train"]['index']
 
@@ -170,14 +169,12 @@ if __name__ == "__main__":
     )
     
     if args.seed == 0:
-        # eval_stat_corr_time(config)
-        # run_pred_similarity(config)
-        # run_next_event_predict(config)
+        eval_stat_corr_time(config)
+        run_pred_similarity(config)
+        run_next_event_predict(config)
         run_tstr(config)
-        # run_cond(config)
     else:
         # eval_stat_corr_time(config) # doesn't change with seed
-        # run_pred_similarity(config)
-        # run_next_event_predict(config)
+        run_pred_similarity(config)
+        run_next_event_predict(config)
         run_tstr(config)
-        # run_cond(config)

@@ -121,11 +121,11 @@ def main(data_path, dataset, obs_size):
     tokenizer = AutoTokenizer.from_pretrained('emilyalsentzer/Bio_ClinicalBERT')
 
     if os.path.exists(data_path.replace(".h5", "_hi_input.npy")):
-        inputs = np.load(data_path.replace(".h5", "_hi_input.npy"))
-        types = np.load(data_path.replace(".h5", "_hi_type.npy"))
-        dpes = np.load(data_path.replace(".h5", "_hi_dpe.npy"))
-        times = np.load(data_path.replace(".h5", "_hi_time.npy"))
-        num_times = np.load(data_path.replace(".h5", "_hi_num_time.npy"))
+        inputs = np.load(data_path.replace(".h5", "_hi_input.npy"), allow_pickle=True)
+        types = np.load(data_path.replace(".h5", "_hi_type.npy"), allow_pickle=True)
+        dpes = np.load(data_path.replace(".h5", "_hi_dpe.npy"), allow_pickle=True)
+        times = np.load(data_path.replace(".h5", "_hi_time.npy"), allow_pickle=True)
+        num_times = np.load(data_path.replace(".h5", "_hi_num_time.npy"), allow_pickle=True)
     else:
         split_to_csv(data_path)
         
@@ -148,7 +148,7 @@ def main(data_path, dataset, obs_size):
 
 
     if os.path.exists(data_path.replace(".h5", "_hi_input_reduced.npy")):
-        inputs_reduced = np.load(data_path.replace(".h5", "_hi_input_reduced.npy"))
+        inputs_reduced = np.load(data_path.replace(".h5", "_hi_input_reduced.npy"), allow_pickle=True)
     else:
         num_cores = cpu_count()
         slices = np.array_split(inputs, num_cores)

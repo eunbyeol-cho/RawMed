@@ -97,6 +97,7 @@ class MIMICIV(EHR):
                     "formulary_drug_cd",
                     "stoptime",
                     "order_provider_id", #MIMIC-IV-2.2V added this column
+                    "form_rx", #High null rate
                 ],
                 "numeric":["doses_per_24_hrs", "dose_val_rx", "form_val_disp"],
                 "categorical": ['drug_type', 'drug', 'prod_strength', 'dose_unit_rx', 'form_unit_disp', 'route'],

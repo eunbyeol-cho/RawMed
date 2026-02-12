@@ -7,8 +7,6 @@ def get_eicu_config():
         "ehr": "eicu",
         "max_event_size": {6: 79, 12: 114, 24: 179}[config["obs_size"]],
         "table_names": ["lab", "infusiondrug", "medication"],
-        "predef_vocab": "eicu_predef_vocab.pickle",
-        "col_type": "eicu_col_dtype.pickle",
         "split_file_name": "eicu_split.csv",
         "input_file_name": "eicu_hi_input.npy",
         "type_file_name": "eicu_hi_type.npy",

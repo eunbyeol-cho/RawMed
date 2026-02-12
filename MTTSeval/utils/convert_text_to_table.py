@@ -84,10 +84,17 @@ class TableEvaluator:
         self.pid_col = config["pid_column"]
         self.time_col = config["time_column"]
         
-        # Load predefined vocabulary
-        self.p_vocab = pd.read_pickle(os.path.join(self.config["real_data_root"], self.config["predef_vocab"]))
+        # Load predefined vocabulary from table_metadata
+        table_meta = pd.read_pickle(os.path.join(self.config["real_data_root"], f"{self.ehr}_table_metadata.pkl"))
+        self.p_vocab = {}
+        for tbl, meta in table_meta.items():
+            cols = {}
+            for col in meta.get("categorical_columns", []) + meta.get("numeric_columns", []):
+                is_numeric = col in meta.get("numeric_columns", [])
+                cols[col] = (None, is_numeric)
+            self.p_vocab[tbl] = cols
         self.p_token = {"table": 1, "column": 2, "content": 3}
-        self.col_type = pd.read_pickle(os.path.join(self.config["real_data_root"], self.config["col_type"]))
+        self.col_type = table_meta
         self.mapping_func = pd.read_pickle(os.path.join(self.config["real_data_root"], f"{self.config['ehr']}_id2word.pkl"))
         
         # Recovery options

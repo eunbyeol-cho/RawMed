@@ -22,7 +22,6 @@ def get_base_config():
         "use_multiprocessing": True,
         "num_workers": 32,
         "process_time": "filter",
-        "reduce_vocab": False,
         "threshold": 0.5,
         "postprocess_steps": [1, 2, 3],
         "real_data_root": "",

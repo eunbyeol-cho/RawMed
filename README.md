@@ -23,7 +23,7 @@ conda activate rawmed
 # Install dependencies
 pip install sacred==0.8.5
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-pip install tqdm pandas scikit-learn transformers wandb einops dython
+pip install tqdm pandas scikit-learn transformers wandb einops dython rapidfuzz xgboost h5py
 ```
 
 ### Data Preprocessing
