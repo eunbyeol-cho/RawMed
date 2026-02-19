@@ -228,9 +228,10 @@ class SaveNumpy:
             self.folder_name += f"_top{self.config['topk']}_{self.config['temperature']}"
 
     def concat(self, net_output, targets):
-        for target in self.targets:    
+        for target in self.targets:
             if target in ["input_logits", "type_logits", "dpe_logits"]:
-                pred = torch.argmax(net_output[target], dim=-1).detach().cpu().numpy().reshape(-1, self.max_event_size, self.max_event_token_len)
+                t = net_output[target]
+                pred = (t if t.dim() == 2 else torch.argmax(t, dim=-1)).detach().cpu().numpy().reshape(-1, self.max_event_size, self.max_event_token_len)
 
             elif target in ["enc_indices"]:
                 pred = net_output[target].detach().cpu().numpy().reshape(-1, self.max_event_size, self.spatial_dim*self.config["num_quantizers"])

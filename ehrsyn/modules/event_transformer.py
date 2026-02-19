@@ -112,24 +112,83 @@ class EventTransformer(nn.Module):
         return output_dict, self.get_targets(**kwargs)
     
         
+    def _cached_layer_forward(self, layer, x, past_kv=None):
+        """Run a single TransformerEncoderLayer with KV cache."""
+        attn = layer.self_attn
+
+        # Q, K, V projection for new tokens
+        qkv = F.linear(x, attn.in_proj_weight, attn.in_proj_bias)
+        q, k, v = qkv.chunk(3, dim=-1)
+
+        # Append to KV cache
+        if past_kv is not None:
+            k = torch.cat([past_kv[0], k], dim=1)
+            v = torch.cat([past_kv[1], v], dim=1)
+        new_kv = (k, v)
+
+        # Multi-head reshape
+        bsz = x.size(0)
+        n_heads = attn.num_heads
+        head_dim = self.d_model // n_heads
+        seq_q = q.size(1)
+        seq_k = k.size(1)
+
+        q = q.view(bsz, seq_q, n_heads, head_dim).transpose(1, 2)
+        k = k.view(bsz, seq_k, n_heads, head_dim).transpose(1, 2)
+        v = v.view(bsz, seq_k, n_heads, head_dim).transpose(1, 2)
+
+        # Scaled dot-product attention (no causal mask needed: seq_q is always 1)
+        scale = math.sqrt(head_dim)
+        attn_weights = torch.matmul(q, k.transpose(-2, -1)) / scale
+        attn_weights = F.softmax(attn_weights, dim=-1)
+        attn_output = torch.matmul(attn_weights, v)
+
+        attn_output = attn_output.transpose(1, 2).contiguous().view(bsz, seq_q, self.d_model)
+        attn_output = attn.out_proj(attn_output)
+
+        # Post-norm residual connection
+        x = layer.norm1(x + layer.dropout1(attn_output))
+
+        # Feedforward
+        ff_output = layer.linear2(layer.dropout(layer.activation(layer.linear1(x))))
+        x = layer.norm2(x + layer.dropout2(ff_output))
+
+        return x, new_kv
+
     @torch.no_grad()
-    def generate(self, top_k: int = None, temperature: float = 1.0, sample: bool = True, **kwargs) -> torch.Tensor:
+    def generate(self, top_k: int = None, temperature: float = 1.0, sample: bool = True, use_kv_cache: bool = True, **kwargs) -> torch.Tensor:
         batch_size = kwargs["code_ids"].shape[0]
         event_len = (kwargs["time_ids"].size(1) +  kwargs["code_ids"].size(1)) // self.max_event_size
 
         device = kwargs["code_ids"].device
         sequence = torch.full((batch_size, 1), self.start_token, dtype=torch.long, device=device)
-        
+
+        # Initialize KV cache for each transformer layer
+        kv_cache = [None] * len(self.transformer.layers)
+
         for i in range(self.max_len - 1):
-            x = self.lut(sequence) * math.sqrt(self.d_model)
-            x = self.pos_encoder(x)
+            if use_kv_cache:
+                # Only process the latest token
+                new_token = sequence[:, -1:]
+                x = self.lut(new_token) * math.sqrt(self.d_model)
+                x = self.pos_encoder.forward_step(x, i)
 
-            pad_mask = sequence.eq(self.config["pad_token_id"])
-            subsequent_mask = self._generate_square_subsequent_mask(x.size(1)).to(x.device)
+                # Run through transformer layers with KV cache
+                for layer_idx, layer in enumerate(self.transformer.layers):
+                    x, kv_cache[layer_idx] = self._cached_layer_forward(layer, x, kv_cache[layer_idx])
 
-            transformer_output = self.transformer(x, mask=subsequent_mask, src_key_padding_mask=pad_mask)
-            
-            logits = self.proj(transformer_output)[:, -1, :] / temperature
+                # Apply final norm if exists
+                if self.transformer.norm is not None:
+                    x = self.transformer.norm(x)
+
+                logits = self.proj(x[:, -1, :]) / temperature
+            else:
+                x = self.lut(sequence) * math.sqrt(self.d_model)
+                x = self.pos_encoder(x)
+                pad_mask = sequence.eq(self.config["pad_token_id"])
+                subsequent_mask = self._generate_square_subsequent_mask(x.size(1)).to(x.device)
+                transformer_output = self.transformer(x, mask=subsequent_mask, src_key_padding_mask=pad_mask)
+                logits = self.proj(transformer_output)[:, -1, :] / temperature
 
             logits = self._handle_time_location(logits, i, event_len)
 
@@ -139,7 +198,7 @@ class EventTransformer(nn.Module):
             probs = F.softmax(logits, dim=-1)
             next_word = self._get_next_word(probs, sample)
             sequence = torch.cat([sequence, next_word], dim=1)
-        
+
         # Reshape output for code and time logits
         sequence = sequence[:, 1:] # Remove start token
         reshaped_output = sequence.reshape(batch_size, self.max_event_size, event_len)
@@ -149,7 +208,7 @@ class EventTransformer(nn.Module):
             "time_logits": F.one_hot(reshaped_output[:, :, :self.time_len].reshape(batch_size, -1), num_classes=self.vocab).float()
         }
         return output_dict, self.get_targets(**kwargs)
-    
+
     def _handle_time_location(self, logits, iter, event_len):
         """
         Handle time location based logits adjustments.

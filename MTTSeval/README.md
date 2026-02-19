@@ -1,35 +1,47 @@
 # MTTSeval
-Multi-table Time-series EHR evaluThis project provides a framework for evaluating multi-table time-series Electronic Health Records (EHRs). This README outlines the setup instructions and steps to run the evaluation scripts.
 
-## Setup Instructions
+Multi-table Time-series EHR evaluation framework. Provides comprehensive metrics for evaluating synthetic EHR data including distributional similarity, inter-table relationships, temporal dynamics, and utility.
 
-1. Clone the repository:
+## Setup
+
 ```bash
-git clone [repository-url]
 cd MTTSeval
-```
 
-2. Create and activate a conda environment:
-```bash
+# Create and activate conda environment
 conda create -n ehrsyn python=3.9
 conda activate ehrsyn
-```
 
-3. Install the package in development mode:
-```bash
+# Install the package in development mode
 pip install -e .
 ```
 
-This will install the package and all its dependencies, and set up the proper Python path for importing modules.
+## Usage
 
-## Running Evaluation Scripts
+### Step 1: Postprocess
 
-After completing the setup, you can run the following scripts:  
+Converts text-format data to per-table CSVs, then postprocesses them (e.g., handling invalid values, aligning schemas). Both real and synthetic data need this step.
 
-- **`run_postprocess.sh`**: Postprocesses generative tables, converting text to table format and performing additional postprocessing.  
-- **`run_eval.sh`**: Executes the evaluation pipeline.  
-
-Run the scripts directly from the terminal:  
 ```bash
-bash run_postprocess.sh
-bash run_eval.sh
+# Postprocess real data
+bash run_postprocess.sh [dataset] [obs_window] [cuda_device] real [data_root]
+
+# Postprocess synthetic data
+bash run_postprocess.sh [dataset] [obs_window] [cuda_device] syn [data_root] [syn_data_root]
+```
+
+### Step 2: Run evaluation
+
+```bash
+bash run_eval.sh [dataset] [obs_window] [cuda_device] [data_root] [syn_data_root]
+```
+
+### Arguments
+
+| Argument | Description | Example |
+|---|---|---|
+| `dataset` | Dataset name (`eicu` or `mimiciv`) | `eicu` |
+| `obs_window` | Observation window in hours | `12` |
+| `cuda_device` | GPU device ID | `0` |
+| `mode` | `real` or `syn` (postprocess only) | `syn` |
+| `data_root` | Path to preprocessed real data | `/path/to/data` |
+| `syn_data_root` | Path to synthetic data (required for `syn` mode) | `/path/to/syn` |

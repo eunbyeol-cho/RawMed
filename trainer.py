@@ -185,20 +185,28 @@ class Trainer:
     
     def inference_for_comprehensive_test(self, epoch, subset, saver):
         self.model.eval()
-        
-        with torch.no_grad():
-            for idx, sample in enumerate(tqdm.tqdm(self.data_loaders[subset])):
-            
-                net_output, targets = self.model(**sample['net_input'])
-                
-                if self.config["pretrained_AE_path"]:
-                    self.event_autoencoder.eval()
-                    net_output = self.event_autoencoder.module.decode(net_output)                 
-                                        
-                saver.concat(net_output, targets)
+        generated = 0
 
-                if (idx+1) * self.config["batch_size"] >= self.config["gen_samples"]:
-                    return saver
+        # For parallel sampling: offset CUDA seed so each process generates different samples
+        seed_offset = int(os.environ.get("SEED_OFFSET", 0))
+        if seed_offset:
+            torch.cuda.manual_seed(self.config.get("seed", 0) + seed_offset)
+
+        with torch.no_grad():
+            while generated < self.config["gen_samples"]:
+                for sample in tqdm.tqdm(self.data_loaders[subset]):
+
+                    net_output, targets = self.model(**sample['net_input'])
+
+                    if self.config["pretrained_AE_path"]:
+                        self.event_autoencoder.eval()
+                        net_output = self.event_autoencoder(_decode_net_output=net_output)
+
+                    saver.concat(net_output, targets)
+                    generated += net_output[list(net_output.keys())[0]].size(0)
+
+                    if generated >= self.config["gen_samples"]:
+                        return saver
 
         return saver
 

@@ -36,33 +36,55 @@ python ehrsyn/datamodules/preprocess.py
 
 ### Training
 
-Train the model in two stages:
+Train the model in two stages. Both scripts take the following arguments:
+
+```
+bash run_scripts/<script>.sh [dataset] [obs_window] [cuda_device] [data_root] [ckpt_root] [syn_data_root]
+```
+
+| Argument | Description | Example |
+|---|---|---|
+| `dataset` | Dataset name (`eicu` or `mimiciv`) | `eicu` |
+| `obs_window` | Observation window in hours (`6`, `12`, or `24`) | `12` |
+| `cuda_device` | Comma-separated GPU IDs | `0` or `0,1,2,3` |
+| `data_root` | Path to preprocessed NumPy data | `/path/to/data` |
+| `ckpt_root` | Path to save/load model checkpoints | `/path/to/ckpts` |
+| `syn_data_root` | Path to save generated synthetic data | `/path/to/output` |
 
 **Stage 1: Train RQ-VAE for event compression**
 ```bash
-bash run_scripts/train_RQVAE.sh
+bash run_scripts/train_RQVAE.sh eicu 12 0 /path/to/data /path/to/ckpts /path/to/output
 ```
 
-**Stage 2: Train autoregressive model for temporal modeling**
+**Stage 2: Train AR model and sample synthetic data**
+
+Training and sampling are separated within the script. Uncomment the training block to train, then run sampling:
+
 ```bash
-bash run_scripts/train_AR.sh
+bash run_scripts/train_AR.sh eicu 12 0,1,2,3 /path/to/data /path/to/ckpts /path/to/output
 ```
+
+When multiple GPUs are specified (e.g., `0,1,2,3`), sampling is automatically parallelized across GPUs via `run_scripts/parallel_sample.py`. Each GPU runs an independent process with a different random seed, and results are concatenated.
 
 ### Evaluation
 
-Evaluate the generated synthetic data using **MTTSeval**, a comprehensive evaluation framework for multi-table time-series EHRs. MTTSeval provides various evaluation metrics including:
+Evaluate the generated synthetic data using **MTTSeval**, a comprehensive evaluation framework for multi-table time-series EHRs. The evaluation pipeline consists of two steps:
+
+1. **Postprocess**: Convert generated NumPy arrays to table format (CSV)
+2. **Evaluate**: Run evaluation metrics on the postprocessed tables
+
+```bash
+cd MTTSeval
+bash run_postprocess.sh [dataset] [obs_window] [cuda_device] [mode] [data_root] [syn_data_root]
+bash run_eval.sh [dataset] [obs_window] [cuda_device] [data_root] [syn_data_root]
+```
+
+MTTSeval provides various evaluation metrics including:
 
 - **Statistical distribution analysis**: Compares distributional similarity between real and synthetic data
 - **Correlation analysis**: Evaluates inter-table relationships and correlations
 - **Temporal dynamics analysis**: Assesses time-series patterns and temporal consistency
 - **Utility evaluation**: Includes TSTR (Train on Synthetic, Test on Real) and prediction similarity metrics
-
-To run evaluation:
-
-```bash
-cd MTTSeval
-bash run_eval.sh
-```
 
 See `MTTSeval/README.md` for detailed setup and usage instructions.
 

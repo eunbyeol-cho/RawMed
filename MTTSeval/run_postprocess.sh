@@ -16,14 +16,14 @@ else
 fi
 
 # Step 1: Convert text to table format
-CUDA_VISIBLE_DEVICES=$cuda_device python utils/convert_text_to_table.py \
-    --ehr $dataset \
-    --syn_data_root $syn_data_root \
-    --real_data_root $data_root
-
-# Step 2: Postprocess tables (syn mode only)
-# CUDA_VISIBLE_DEVICES=$cuda_device python utils/postprocess_table.py \
+# CUDA_VISIBLE_DEVICES=$cuda_device python utils/convert_text_to_table.py \
 #     --ehr $dataset \
 #     --syn_data_root $syn_data_root \
-#     --real_data_root $data_root \
-#     --output_data_root results/${dataset}
+#     --real_data_root $data_root
+
+# Step 2: Postprocess tables (syn mode only)
+CUDA_VISIBLE_DEVICES=$cuda_device python utils/postprocess_table.py \
+    --ehr $dataset \
+    --syn_data_root $syn_data_root \
+    --real_data_root $data_root \
+    --output_data_root results/${dataset}

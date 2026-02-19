@@ -88,3 +88,8 @@ class PositionalEncoding(nn.Module):
     def forward(self, x):
         x = x + self.pe[:, : x.size(1)]
         return self.dropout(x)
+
+    def forward_step(self, x, step):
+        """Positional encoding for a single step (used with KV cache)."""
+        x = x + self.pe[:, step:step+1]
+        return self.dropout(x)

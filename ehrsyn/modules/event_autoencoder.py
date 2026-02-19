@@ -59,18 +59,21 @@ class EventAutoEncoder(nn.Module):
             targets["time_ids"] = kwargs['time_ids']
         return targets
 
-    def forward(self, **kwargs):
+    def forward(self, _decode_net_output=None, **kwargs):
+        if _decode_net_output is not None:
+            return self.decode(_decode_net_output)
+
         output_dict = {}
 
-        # Encoding step 
-        encoded = self.encode_model(self.input2emb_model(**kwargs)) 
+        # Encoding step
+        encoded = self.encode_model(self.input2emb_model(**kwargs))
         if self.quantize_model: # Vector quantization
             vq_output = self.quantize_model(encoded)
             output_dict.update(vq_output)
             encoded = vq_output['quantized']
         else:
             output_dict.update({"cont_latents": encoded})
-        
+
         # Decoding step
         decoded = self.decode_model(encoded)
 
@@ -118,8 +121,10 @@ class EventAutoEncoder(nn.Module):
                 encoded[non_existing_vocab_mask] = 0
                 
                 decoded = self.decode_model(self.quantize_model._embedding(encoded))
-            logits = self.emb2out_model(decoded)  
-        
+            logits = self.emb2out_model(decoded)
+            # Argmax here to reduce tensor size before DP gather
+            logits = {k: torch.argmax(v, dim=-1) for k, v in logits.items()}
+
         net_output.update(logits)
         net_output.update({"enc_indices":encoded})
         return net_output
